@@ -6,7 +6,6 @@ class App extends React.Component { // classを定義 (文字コードはUTF-8)
   constructor(props){
     super(); // おまじない的に必要 super(props)は古い書き方
     this.state = {tempC: 0, tempF: 32}; // 状態変数定義と初期値
-    this.handleChange = this.handleChange.bind(this);
   }
 
   handleChange(event) {
