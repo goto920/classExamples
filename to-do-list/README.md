@@ -1,68 +1,123 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# create-react-app のサンプルからの変更
 
-## Available Scripts
+不要なファイルを削除
+-- 単に消すだけでなく、git rm ファイル名
 
-In the project directory, you can run:
+## public
+  index.html -- title 変更 (My App)
+     logo192.png へのlink を無効 (HTMLコメント)
+  manifest.json -- favicon.ico以外を削除
+  favicon.ico を自分で作ったものに入れ替え
+変更なし robots.txt -- サーチ避け
 
-### `npm start`
+## src
+変更なしindex.js -- serviceWorker.register()
+変更なし index.css, serviceWorker.js, setupTests.js (不要かも)
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## package.json
+"homepage": "予定URL", を追加
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+## App.js の内容
 
-### `npm test`
+参考URL: 
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+A) https://developer.mozilla.org/ja/docs/Learn/Tools_and_testing/Client-side_JavaScript_frameworks/React_todo_list_beginning 
+-- function App(props) のスタイル
 
-### `npm run build`
+B) https://qiita.com/rioc/items/8723c236e10d989e827d
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+プログラムのスタイルはB) の方が近い。
+A) は部分的に参考にする。
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+===============================================
+Step  1. App.jsとToDoItemの基本定義
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+ファイル1 App.js -- 前回と同じスタイルで
 
-### `npm run eject`
+import ... 
+import ToDoItem from "./ToDoItem.js";
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+class App extends React.Component {
+  constructor(props){
+    super();
+  }
+  
+  render() {
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+    return (
+      <div className="App">
+      表示内容
+      <hr />
+      <ToDoItem title=... />
+      <hr />
+      <ToDoItem title=... />
+      <hr />
+      </div>
+    );
+    // titleなどのproperty (props) の値を仮に直接書き込む
+    // <ToDo ... は次で消す
+  }
+}
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+ファイル2 ToDoItem.js -- 一つのToDo内容 (表示も込み?)
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+// import "./ToDoItem.css"; // cssは後で必要なら
 
-## Learn More
+class ToDoItem extends React.Component {
+  // constructorを省略するとdefault constructorが有効になり
+  // 外で与えられたpropsをthis.props.title 等で使う
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+  render() {
+    const {     }; = this.props; 
+      // いちいちthis.props.title と書かなくて済むように
+      // 値を変更しないので、const
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+    return(
+     <div>  
+       propsの各値を{title} などで表示      
+     </div>
+    )
+  }
 
-### Code Splitting
+}
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+=========================================
+Step 2. ToDoItemの追加UI
 
-### Analyzing the Bundle Size
+constructor()内
+  this.state = {
+    toDoList: []; // ToDoの配列 (初期値は空)
+    inputなどのstate定義
+  }
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+render, returnのUI画面
 
-### Making a Progressive Web App
+<form onSubmit={this.handleAddToDo} .. 
+<input type="text" ... タイトル 
+<textarea /> 内容
+<input type="radio" ... low, normal, high の選択 (やや難)
+締切
+<select ... 年、月、日を選ぶ
+  <option> を31行書いてもよいが、配列を用意 (constructor()内)
+以上すべて同じメソッド(関数) handleAddToDo()で処理
+<input type="submit" ... 確定
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+ event.target.nameで振り分け
 
-### Advanced Configuration
+入力の処理関数 handleAddToDo(event){
+   const {name,value} = event.target;
+   if (name === "title") this.setState({title: value});
+   .. など
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+   if (name === "submission") {
+    // 内容はあとで
+   }
 
-### Deployment
+}
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
 
-### `npm run build` fails to minify
+=========================================
+Step 3. 
+  
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+以上
