@@ -7,6 +7,7 @@ class App extends React.Component {
   constructor(props){
     super(); 
 
+    this.toDoList = [];
 
     this.mmOptions = [];
     for (let i = 1; i <= 12; i++) {
@@ -21,7 +22,6 @@ class App extends React.Component {
     }
 
     this.state = {
-      toDoList : [],
       title: null, 
       description: null,
       priority: "normal", 
@@ -51,7 +51,7 @@ class App extends React.Component {
      <input type="radio" name="priority" value="low"
         checked={this.state.priority === "low"}
         onChange = {this.handleAddToDo} />low
-     <input type="radio" name="priority" value="normal"
+     <input type="radio" name="priority" value="normal" checked
         checked={this.state.priority === "normal"}
         onChange = {this.handleAddToDo} />normal
      <input type="radio" name="priority" value="high"
@@ -83,15 +83,16 @@ class App extends React.Component {
   handleAddToDo(event){
     const {name,value} = event.target;
 
-    if (name === "title") this.setState({title: value});
-    if (name === "description") this.setState({description: value});
     if (name === "priority") this.setState({priority: value});
     if (name === "dYear")    this.setState({dYear: value});
-    if (name === "dMonth")   this.setState({dMonth: value});
+    if (name === "dMonth")   {
+       this.setState({dMonth: value});
+       console.log ("dMonth", value);
+    }
     if (name === "dDay")     this.setState({dDay: value});
 
     if (name === "submission") {
-      // 内容はあとで
+    // this.toDoList.push(toDo);
     }
   }
 
