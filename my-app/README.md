@@ -18,3 +18,9 @@ App.js-step0 (3回目スライド p14)
 App.js-step1 (p15)
 
 ## package.json
+"homepage": "予定URL",
+を追加
+
+index.js に<App /> を追加して、Appが2つになることを確認
+
+以上
