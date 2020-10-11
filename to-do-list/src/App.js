@@ -71,9 +71,9 @@ class App extends React.Component {
      d <select name="dDay" value={dDay} 
         onChange = {this.handleAddToDo}>
      {this.ddOptions}
-     </select>
+     </select><br />
      <button type="submit">ADD</button>
-     <button type="cancel">cancel</button>
+     {/* <button type="cancel">cancel</button> */}
      <hr />
      </form>
      </div>
