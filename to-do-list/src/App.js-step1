@@ -26,7 +26,9 @@ class App extends React.Component {
        value={this.state.title}
        required onChange={this.handleChange} /><br />
      Description: <br />
-      <textarea name="description" placeholder="description" cols="50"
+      <textarea name="description" 
+       value={this.state.description}
+       placeholder="description" cols="50"
        onChange={this.handleChange} /><br />
      <button name="add" onClick={this.handleAddItem}> 
        Add ToDo Item</button>
