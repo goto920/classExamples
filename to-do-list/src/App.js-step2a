@@ -19,6 +19,18 @@ class App extends React.Component {
 
   render () { // 描画処理
 
+    let toDoListDisplay = this.state.toDoList;
+    // add filter, sort here 
+    const toDoListUI = toDoListDisplay.map((item,index,array) => 
+    (<div key={index}>
+     {index}: Title: {item.title}<br />
+     Description: {item.description}<br />
+     Creation: {new Date(item.creation).toLocaleString()}<br />
+     <button name="delete">Delete</button>
+    <hr />
+    </div>
+    )); 
+
     return (
      <div className="App"> <hr />
      Title: &nbsp;
@@ -26,11 +38,14 @@ class App extends React.Component {
        value={this.state.title}
        required onChange={this.handleChange} /><br />
      Description: <br />
-      <textarea name="description" placeholder="description" cols="50"
+      <textarea name="description" 
+       value={this.state.description}
+       placeholder="description" cols="50"
        onChange={this.handleChange} /><br />
      <button name="add" onClick={this.handleAddItem}> 
        Add ToDo Item</button>
      <hr />
+     {toDoListUI}
      </div>
     );
   }
@@ -59,14 +74,9 @@ class App extends React.Component {
     this.setState({title: "",description: ""});
 
     let newList = [...this.state.toDoList, newItem];
+
     this.setState({toDoList: newList});
-
-    let message = 
-       newItem.title +"\n" + 
-       newItem.description +"\n" + newItem.creation;
-    alert(message);
-
-    console.log(this.state.toDoList);
+    // console.log(this.state.toDoList);
 
   }
 
