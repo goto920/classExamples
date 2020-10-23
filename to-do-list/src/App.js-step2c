@@ -80,8 +80,8 @@ class App extends React.Component {
 
     const newList = [...this.state.toDoList, newItem];
     this.setState({toDoList: newList});
-    // console.log(JSON.stringify(this.state.toDoList));
-    // console.log(JSON.stringify(newList));
+    // console.log(JSON.stringify(this.state.toDoList)); // Bad
+    // console.log(JSON.stringify(newList)); // Good
     localStorage.setItem('toDoList', JSON.stringify(newList));
 
   }

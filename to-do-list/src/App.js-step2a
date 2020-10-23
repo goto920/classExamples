@@ -76,7 +76,8 @@ class App extends React.Component {
     let newList = [...this.state.toDoList, newItem];
 
     this.setState({toDoList: newList});
-    // console.log(this.state.toDoList);
+    // console.log(newList); // Good
+    // console.log(this.state.toDoList); // Bad
 
   }
 
