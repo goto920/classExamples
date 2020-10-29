@@ -1,0 +1,141 @@
+import React from 'react'; 
+import './App.css'; 
+import Calendar from 'react-calendar';
+
+class App extends React.Component { 
+
+  constructor(props){
+    super(); 
+
+    const toDoListSaved 
+      = JSON.parse(localStorage.getItem('toDoList')) || [];
+
+    this.state = {
+      toDoList : toDoListSaved,
+      title: '',
+      description: '',
+      deadline: null,
+      sortBy: 'c-asc',
+      filter: 'none'
+    };
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleAddItem = this.handleAddItem.bind(this);
+    this.deleteItem = this.deleteItem.bind(this);
+    this.handleCalendar = this.handleCalendar.bind(this);
+    this.setSort = this.setSort.bind(this);
+    this.setFilter = this.setFilter.bind(this);
+  }
+
+
+  render () { // 描画処理
+
+    let toDoListDisplay = this.state.toDoList;
+    // add filter, sort here 
+    switch (this.state.sortBy) {
+      case 'c-asc': 
+        toDoListDisplay.sort((a,b) => a.creation - b.creation); 
+      break;
+      case 'c-desc': 
+        toDoListDisplay.sort((a,b) => b.creation - a.creation); 
+      break;
+      case 'd-asc': 
+        toDoListDisplay.sort((a,b) => a.deadline - b.deadline); 
+      break;
+      case 'd-desc': 
+        toDoListDisplay.sort((a,b) => b.deadline - a.deadline); 
+      break;
+      default:
+    }
+
+    const toDoListUI = toDoListDisplay.map((item,index,array) => 
+    (<div key={index}>
+     {index}: Title: {item.title}<br />
+     Description: {item.description}<br />
+     Creation: {new Date(item.creation).toLocaleString()}<br />
+     Deadline: {new Date(item.deadline).toLocaleString()}<br />
+     <button name="delete" value={item.creation} 
+         onClick={this.deleteItem} >Delete</button>
+    <hr />
+    </div>
+    )); 
+
+    return (
+     <div className="App"> <hr />
+     Title: &nbsp;
+     <input type="text" name="title" placeholder="title" 
+       value={this.state.title}
+       required onChange={this.handleChange} /><br />
+     Description: <br />
+      <textarea name="description" 
+       value={this.state.description}
+       placeholder="description" cols="50"
+       onChange={this.handleChange} /><br />
+     <Calendar calendarType='US'
+        onChange={this.handleCalendar} value={this.state.deadline} />
+     <button name="add" onClick={this.handleAddItem}> 
+       Add ToDo Item</button>
+     <hr />
+     Sort by <select name="sort" 
+        value={this.state.sortBy} onChange={this.setSort}>
+     <option value="c-asc">creation(asc)</option>
+     <option value="c-desc">creation(desc)</option>
+     <option value="d-asc">deadline(asc)</option>
+     <option value="d-desc">deadline(desc)</option>
+     </select>
+     <hr />
+     {toDoListUI}
+     </div>
+    );
+  }
+
+  handleCalendar(value){ this.setState({deadline: value})}
+  setSort(e){ this.setState({sortBy: e.target.value})}
+  setFilter(e){ this.setState({filter: e.target.value})}
+
+  handleChange(e) {
+    if (e.target.name === 'title'){
+       this.setState({title : e.target.value});
+    } else if (e.target.name === 'description'){
+       this.setState({description : e.target.value});
+    }
+  }
+
+  handleAddItem(e) {
+
+    if (e.target.name !== 'add') return;
+
+    if (this.state.title === '') {
+      alert('Title is empty'); return;
+    }
+
+    const newItem = {
+      title: this.state.title,
+      description: this.state.description,
+      creation: Date.now(),
+      deadline: this.state.deadline.getTime()
+    };
+    this.setState({title: "", description: "", deadline: null});
+
+    const newList = [...this.state.toDoList, newItem];
+    this.setState({toDoList: newList});
+    // console.log(JSON.stringify(this.state.toDoList)); // Bad
+    // console.log(JSON.stringify(newList)); // Good
+    localStorage.setItem('toDoList', JSON.stringify(newList));
+
+  }
+
+  deleteItem(e){
+    const creation = parseInt(e.target.value);
+    const newList = this.state.toDoList;
+
+    const index = newList.findIndex(item => item.creation === creation);
+
+    if (index >= 0) newList.splice(index,1);
+    this.setState({toDoList: newList});
+    localStorage.setItem('toDoList', JSON.stringify(newList));
+  }
+
+} 
+
+export default App;
