@@ -16,12 +16,12 @@ class App extends React.Component {
       description: '',
       deadline: null,
       sortBy: 'c-asc',
-      filter: 'none'
+      filter: 'none',
     };
 
     this.handleChange = this.handleChange.bind(this);
     this.handleAddItem = this.handleAddItem.bind(this);
-    this.deleteItem = this.deleteItem.bind(this);
+    this.editItem = this.editItem.bind(this);
     this.handleCalendar = this.handleCalendar.bind(this);
     this.setSort = this.setSort.bind(this);
     this.setFilter = this.setFilter.bind(this);
@@ -32,6 +32,15 @@ class App extends React.Component {
 
     let toDoListDisplay = this.state.toDoList;
     // add filter, sort here 
+    switch (this.state.filter) {
+      case 'active':
+        toDoListDisplay = toDoListDisplay.filter(x => x.status === 'active'); 
+      break;
+      case 'done':
+        toDoListDisplay = toDoListDisplay.filter(x => x.status === 'done'); 
+      break;
+      default:
+    }
     switch (this.state.sortBy) {
       case 'c-asc': 
         toDoListDisplay.sort((a,b) => a.creation - b.creation); 
@@ -51,11 +60,14 @@ class App extends React.Component {
     const toDoListUI = toDoListDisplay.map((item,index,array) => 
     (<div key={index}>
      {index}: Title: {item.title}<br />
+     Status: {item.status} <br />
      Description: {item.description}<br />
      Creation: {new Date(item.creation).toLocaleString()}<br />
      Deadline: {new Date(item.deadline).toLocaleString()}<br />
+     <button name="done" value={item.creation} 
+         onClick={this.editItem} >Done</button>
      <button name="delete" value={item.creation} 
-         onClick={this.deleteItem} >Delete</button>
+         onClick={this.editItem} >Delete</button>
     <hr />
     </div>
     )); 
@@ -73,9 +85,14 @@ class App extends React.Component {
        onChange={this.handleChange} /><br />
      <Calendar calendarType='US'
         onChange={this.handleCalendar} value={this.state.deadline} />
-     <button name="add" onClick={this.handleAddItem}> 
-       Add ToDo Item</button>
+     <button name="add" onClick={this.handleAddItem}>Add</button> &nbsp;
      <hr />
+     Filter <select name="filter" 
+        value={this.state.filter} onChange={this.setFilter}>
+     <option value="none">showall</option>
+     <option value="active">active</option>
+     <option value="done">done</option>
+     </select> <br />
      Sort by <select name="sort" 
         value={this.state.sortBy} onChange={this.setSort}>
      <option value="c-asc">creation(asc)</option>
@@ -109,11 +126,18 @@ class App extends React.Component {
       alert('Title is empty'); return;
     }
 
+    let deadline;  
+    if (this.state.deadline !== null) 
+      deadline = this.state.deadline.getTime();
+    else
+      deadline = Date.now() + 7*24*3600*1000; // default 1 week
+
     const newItem = {
       title: this.state.title,
       description: this.state.description,
       creation: Date.now(),
-      deadline: this.state.deadline.getTime()
+      deadline: deadline,
+      status: 'active'
     };
     this.setState({title: "", description: "", deadline: null});
 
@@ -125,15 +149,18 @@ class App extends React.Component {
 
   }
 
-  deleteItem(e){
+  editItem(e){
     const creation = parseInt(e.target.value);
     const newList = this.state.toDoList;
-
     const index = newList.findIndex(item => item.creation === creation);
+    if (index === 0) return;
 
-    if (index >= 0) newList.splice(index,1);
+    if (e.target.name === 'delete')  newList.splice(index,1);
+    else if (e.target.name === 'done')  newList[index].status = 'done';
+
     this.setState({toDoList: newList});
     localStorage.setItem('toDoList', JSON.stringify(newList));
+
   }
 
 } 
