@@ -1,0 +1,220 @@
+import React from 'react'; 
+import './App.css'; 
+import Calendar from 'react-calendar';
+import {saveAs} from 'file-saver';
+
+class App extends React.Component { 
+
+  constructor(props){
+    super(); 
+
+    const toDoListSaved 
+      = JSON.parse(localStorage.getItem('toDoList')) || [];
+
+    this.state = {
+      toDoList : toDoListSaved,
+      title: '',
+      description: '',
+      deadline: null,
+      sortBy: 'c-asc',
+      filter: 'none',
+      edit: 0 // 0 (new) or item creation time
+    };
+
+    this.handleAddItem = this.handleAddItem.bind(this);
+    this.editItem = this.editItem.bind(this);
+    this.handleFile = this.handleFile.bind(this);
+  }
+
+  componentWillUnmount(){
+    localStorage.setItem('toDoList', JSON.stringify(this.state.toDoList));
+  }
+
+  render () { // 描画処理
+
+    let toDoListDisplay = this.state.toDoList;
+    // add filter, sort here 
+    switch (this.state.filter) {
+      case 'active':
+        toDoListDisplay = toDoListDisplay.filter(x => x.status === 'active'); 
+      break;
+      case 'done':
+        toDoListDisplay = toDoListDisplay.filter(x => x.status === 'done'); 
+      break;
+      default:
+    }
+    switch (this.state.sortBy) {
+      case 'c-asc': 
+        toDoListDisplay.sort((a,b) => a.creation - b.creation); 
+      break;
+      case 'c-desc': 
+        toDoListDisplay.sort((a,b) => b.creation - a.creation); 
+      break;
+      case 'd-asc': 
+        toDoListDisplay.sort((a,b) => a.deadline - b.deadline); 
+      break;
+      case 'd-desc': 
+        toDoListDisplay.sort((a,b) => b.deadline - a.deadline); 
+      break;
+      default:
+    }
+
+    const toDoListUI = toDoListDisplay.map((item,index,array) => 
+    (<div key={index}>
+     {index}: Title: {item.title}<br />
+     Status: {item.status} <br />
+     Description: {item.description}<br />
+     Creation: {new Date(item.creation).toLocaleString()}<br />
+     Deadline: {new Date(item.deadline).toLocaleString()}<br />
+     <button name="done" value={item.creation} 
+        onClick={this.editItem} >Done</button> &nbsp;
+     <button name="edit" value={item.creation}
+        onClick={this.editItem}>Edit</button>&nbsp;
+     <button name="delete" value={item.creation} 
+        onClick={this.editItem} >Delete</button>
+    <hr />
+    </div>
+    )); 
+
+    return (
+     <div className="App"> <hr />
+     {this.state.edit ? 
+       "Edit: " + new Date(this.state.edit).toLocaleString() : "Add new toDo Item"}
+     <hr />
+     Title: &nbsp;
+     <input type="text" name="title" placeholder="title" 
+       value={this.state.title} required 
+       onChange={(e) => this.setState({title: e.target.value})}/><br />
+     Description: <br />
+      <textarea name="description" 
+       value={this.state.description}
+       placeholder="description" cols="50"
+       onChange={(e) => this.setState({description: e.target.value})} /><br />
+     <Calendar calendarType='US'
+        value={this.state.deadline} 
+        onChange={(value) => this.setState({deadline: value})}/>
+     <button name="add" value={this.state.edit}
+     onClick={this.handleAddItem}>
+     {this.state.edit ? "Modify": "Add"}</button> &nbsp;
+     <button name="cancel" 
+       onClick={(e) => this.setState({title: '', 
+               description: '', deadline: null, edit: 0})}>
+     Cancel</button> &nbsp;
+     <hr />
+     Filter <select name="filter" 
+        value={this.state.filter} 
+            onChange={(e) => this.setState({filter: e.target.value})}>
+     <option value="none">showall</option>
+     <option value="active">active</option>
+     <option value="done">done</option>
+     </select> &nbsp; | &nbsp;
+     Sort by <select name="sort" 
+        value={this.state.sortBy} 
+          onChange={(e) => this.setState({sortBy: e.target.value})}>
+     <option value="c-asc">creation(asc)</option>
+     <option value="c-desc">creation(desc)</option>
+     <option value="d-asc">deadline(asc)</option>
+     <option value="d-desc">deadline(desc)</option>
+     </select><br />
+     Load: <input type="file" name="load" accept="application/json"
+           onChange={this.handleFile} /><br />
+     Save: <button name="save" onClick={this.handleFile}>Save</button>
+     <hr />
+     {toDoListUI}
+     </div>
+    );
+  }
+
+  handleAddItem(e) {
+
+    if (this.state.title === '') {alert('Title is empty'); return;}
+
+    let deadline;  
+    if (this.state.deadline !== null) 
+      deadline = this.state.deadline.getTime();
+    else
+      deadline = Date.now() + 7*24*3600*1000; // default 1 week
+
+    let newItem;
+    let newList = [];
+    if (parseInt(e.target.value) === 0) { // add new
+      newItem = {
+        title: this.state.title,
+        description: this.state.description,
+        creation: Date.now(),
+        deadline: deadline,
+        status: 'active'
+      };
+      newList = [...this.state.toDoList, newItem];
+    } else { // modify
+      newList = this.state.toDoList;
+      const creation = parseInt(e.target.value);
+      const index = newList.findIndex(item => item.creation === creation);
+      if (index >= 0) {
+        const item = newList[index];
+        item.title = this.state.title;
+        item.description = this.state.description;
+        item.deadline = this.state.deadline.getTime();
+      }
+    }
+
+    this.setState({title: "", description: "", deadline: null, edit: 0});
+    this.setState({toDoList: newList});
+    localStorage.setItem('toDoList', JSON.stringify(newList));
+
+  }
+
+    editItem(e){
+      const creation = parseInt(e.target.value);
+      const newList = this.state.toDoList;
+      const index = newList.findIndex(item => item.creation === creation);
+      if (index < 0) return; // correction
+
+      if (e.target.name === 'delete')  newList.splice(index,1);
+      else if (e.target.name === 'done')  newList[index].status = 'done';
+      else if (e.target.name === 'edit') {
+        const item = newList[index];
+        this.setState({
+          title: item.title, 
+          creation: item.creation,
+          description: item.description,
+          deadline: new Date(item.deadline),
+          edit: item.creation})
+      return;
+    }
+
+    this.setState({toDoList: newList});
+    localStorage.setItem('toDoList', JSON.stringify(newList));
+    
+  }
+
+  handleFile(e){
+    if (e.target.name === 'save') {
+      const blob = new Blob(
+        [JSON.stringify(this.state.toDoList)],
+        {type: 'application/json;charset=utf-8'});
+      saveAs(blob, "toDoList.json");
+    } 
+
+    if (e.target.name === 'load') {
+      const reader = new FileReader();
+/*
+      reader.onload = function(e) {
+        this.setState({toDoList: JSON.parse(reader.result)})
+      }.bind(this)
+*/
+      reader.onload = (e) => { 
+        const newList = JSON.parse(reader.result);
+        this.setState({toDoList: newList});
+        localStorage.setItem('toDoList', reader.result);
+      }
+      // onload は読み込みに実行する処理の指定
+      // eは成功、失敗などの情報 (エラー処理は省略)
+
+      reader.readAsText(e.target.files[0]); // 読み込み開始
+    }
+  }
+
+} 
+
+export default App;
